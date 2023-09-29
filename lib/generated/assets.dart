@@ -504,6 +504,9 @@ class Assets {
   static const String otherSmilingface = 'assets/gameAssets/images/other/smilingface.gif';
   static const String otherStars = 'assets/gameAssets/images/other/stars.json';
   static const String otherStars2 = 'assets/gameAssets/images/other/stars2.json';
+  static const String paymentgatewayFirebaseManage = 'lib/Paymentgateway/firebaseManage.dart';
+  static const String paymentgatewayPayhereServices = 'lib/Paymentgateway/payhereServices.dart';
+  static const String paymentgatewaySubscriptionPlanScreen = 'lib/Paymentgateway/subscriptionPlanScreen.dart';
   static const String phonologicalAssetsBackgroundImage = 'assets/phonologicalAssets/background_image.jpg';
   static const String phonologicalAssetsBackgroundImage1 = 'assets/phonologicalAssets/background_image1.jpg';
   static const String phonologicalAssetsBackgroundImage2 = 'assets/phonologicalAssets/background_image2.jpg';
