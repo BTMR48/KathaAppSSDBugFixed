@@ -95,7 +95,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                   const [
                     "Word Error Detection",
                     "Letter by letter show error ",
-                     "Therapeutic gaming activities "
+                     "Therapeutic gaming activities ",
                   ],
                   cardColor: Colors.blueAccent,
                 ),
