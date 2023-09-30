@@ -4,12 +4,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:katha/Screens/Users/screens/signUpScreen.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
+import '../../../Provider/internet_provider.dart';
 import '../../../Provider/sign_in_provider.dart';
 import '../../../utils/configt.dart';
 import '../../../utils/next_Screen.dart';
+import '../../../utils/snack_bar.dart';
 import '../../ScreenTest/HomeScreen.dart';
 import 'homeScreen.dart';
 
@@ -207,6 +211,38 @@ class _LoginScreenState extends State<LoginScreen> {
                           SizedBox(height: 20),
                           loginButton,
                           SizedBox(height: 10),
+                          RoundedLoadingButton(
+                            onPressed: () {
+                              handleGoogleSignIn();
+                            },
+                            controller: googleController,
+                            successColor: Colors.white,
+                            // width: width * 19,
+                            elevation: 08,
+                            borderRadius: 25,
+                            color: Colors.red,
+                            width: MediaQuery.of(context).size.width * 0.90,
+                            child: Wrap(
+                              children: [
+                                Icon(
+                                  FontAwesomeIcons.google,
+                                  size: 25,
+                                  color: Colors.white,
+                                  //adding font awesome icons
+                                ),
+                                SizedBox(
+                                  width: width * 0.05,
+                                ),
+                                Text(
+                                  'Sign In With Google',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -228,12 +264,56 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+  final RoundedLoadingButtonController googleController =
+  RoundedLoadingButtonController();
 
+  // handling google sign in
+  Future handleGoogleSignIn() async {
+    final sp = context.read<SignInProvider>();
+    final ip = context.read<InternetProvider>();
+    await ip.checkInternetConnection();
 
+    if (ip.hasInternet == false) {
+      openSnackbar(context, 'Check your Internet connection', Colors.red);
+      googleController.reset();
+    } else {
+      await sp.signInWithGoogle().then((value) {
+        if (sp.hasError == true) {
+          openSnackbar(context, sp.errorCode.toString(), Colors.white);
+          googleController.reset();
+        } else {
+          // checking whether user exists or not
+          sp.checkUserExists().then((value) async {
+            if (value == true) {
+              // user exists
+              await sp.getUserDataFromFirestore(sp.uid).then((value) => sp
+                  .saveDataToSharedPreferences()
+                  .then((value) => sp.setSignIn().then((value) {
+
+                googleController.success();
+                handleAfterSignIn();
+              })));
+            } else {
+              // user does not exist
+              sp.saveDataToFirestore().then((value) => sp
+                  .saveDataToSharedPreferences()
+                  .then((value) => sp.setSignIn().then((value) {
+                // save user location
+
+                googleController.success();
+                handleAfterSignIn();
+              })));
+            }
+          });
+        }
+      });
+    }
+    //login function
+  }
   //handle After SignIn
   handleAfterSignIn() {
     Future.delayed(const Duration(milliseconds: 1000)).then((value) {
-      nextScreenReplace(context,  HomeScreen());
+      nextScreenReplace(context,  HomeScreenAll());
     });
   }
 

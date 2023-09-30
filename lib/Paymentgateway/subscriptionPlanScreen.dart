@@ -4,11 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:katha/Paymentgateway/payhereServices.dart';
 import '../../Provider/user_model.dart';
 import '../Screens/ScreenTest/HomeScreen.dart';
+import 'cancelSubscription.dart';
+import 'firebaseManage.dart';
 
 
 class SubscriptionPlansScreen extends StatefulWidget {
@@ -37,11 +40,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                 child: Row(
                   children: <Widget>[
                     GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => HomeScreen()),
-                      ),
+                onTap: () => Navigator.pop(context),
                       child: Padding(
                         padding: EdgeInsets.only(left: width * 0.04),
                         child: Icon(
@@ -66,60 +65,95 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                 ),
               ),
               GestureDetector(
-                onTap: (){
-                  SubscriptionPayment().premiumPetPurchasePayment(
+                onTap: () async {
+                  EasyLoading.show(status: 'Processing...', maskType: EasyLoadingMaskType.black);
 
-                      mainContext:context,
-                      gSignClientId: '${user?.uid}',
-                      sAppID:'sAppID',
-                      skey:'skey',
-                      phone: '',
-                      email:' ${user?.email}',
-                      name: '${user?.email}',
-                      country:'Sri Lanka',
-                      subscriptionDate:today,
-                      subscriptionPlanCategory:'Premium',
-                      subscriptionExpireDate:   today.add(Duration(days: 30)),
-                      recurrence:'1 Month',
-                      duration:'10 Years',
-                      price:2500,
-                  );
+                  try {
+                    final String? skey = await FirebaseManage().getPayHereRecurringSKey();
+                    final String? sAppID = await FirebaseManage().getPayHereRecurringAPPID();
+
+                    if (skey != null && sAppID != null) {
+                      await SubscriptionPayment().premiumPetPurchasePayment(
+                        mainContext: context,
+                        gSignClientId: '${user?.uid}',
+                        sAppID: sAppID,
+                        skey: skey,
+                        phone: '',
+                        email: ' ${user?.email}',
+                        name: '${user?.email}',
+                        country: 'Sri Lanka',
+                        subscriptionDate: today,
+                        subscriptionPlanCategory: 'Premium',
+                        subscriptionExpireDate: today.add(Duration(days: 30)),
+                        recurrence: '1 Month',
+                        duration: '10 Years',
+                        price: 2500,
+                      );
+                    } else {
+                      EasyLoading.showError("Error occurred. Please try again later", maskType: EasyLoadingMaskType.black);
+                    }
+                  } catch (e) {
+                    print('An error occurred: $e');
+                    EasyLoading.showError("Error occurred. Please try again later", maskType: EasyLoadingMaskType.black);
+                  } finally {
+                    EasyLoading.dismiss();
+                    Navigator.of(context).pop();
+                  }
                 },
-                child:  SubscriptionCard(
-                  title:  "Premium",
+                child: SubscriptionCard(
+                  title: "Premium",
                   currency: 'LKR',
-                  price:  "2500.0",
+                  price: "2500.0",
                   additionalText: 'Per Package/month, Billed monthly',
                   additionalText1: "Features you'll love",
-                  features:
-                  const [
+                  features: const [
                     "Word Error Detection",
-                    "Letter by letter show error ",
-                     "Therapeutic gaming activities ",
+                    "Letter by letter show error",
+                    "Therapeutic gaming activities"
                   ],
                   cardColor: Colors.blueAccent,
                 ),
               ),
-              GestureDetector(
-                onTap: (){
-                  SubscriptionPayment().premiumPetPurchasePayment(
 
-                    mainContext:context,
-                    gSignClientId: '${user?.uid}',
-                    sAppID:'sAppID',
-                    skey:'skey',
-                    phone: '',
-                    email:' ${user?.email}',
-                    name: '${user?.email}',
-                    country:'Sri Lanka',
-                    subscriptionDate:today,
-                    subscriptionPlanCategory:'Advanced',
-                    subscriptionExpireDate:   today.add(Duration(days: 30)),
-                    recurrence:'1 Month',
-                    duration:'10 Years',
-                    price:1500,
-                  );
+              GestureDetector(
+
+                onTap: () async {
+                  EasyLoading.show(status: 'Processing...', maskType: EasyLoadingMaskType.black);
+
+                  try {
+                    final String? skey = await FirebaseManage().getPayHereRecurringSKey();
+                    final String? sAppID = await FirebaseManage().getPayHereRecurringAPPID();
+
+                    if (skey != null && sAppID != null) {
+                      await SubscriptionPayment().premiumPetPurchasePayment(
+
+                        mainContext:context,
+                        gSignClientId: '${user?.uid}',
+                        sAppID:'sAppID',
+                        skey:'skey',
+                        phone: '',
+                        email:' ${user?.email}',
+                        name: '${user?.email}',
+                        country:'Sri Lanka',
+                        subscriptionDate:today,
+                        subscriptionPlanCategory:'Advanced',
+                        subscriptionExpireDate:   today.add(Duration(days: 30)),
+                        recurrence:'1 Month',
+                        duration:'10 Years',
+                        price:1500,
+                      );
+                    } else {
+                      EasyLoading.showError("Error occurred. Please try again later", maskType: EasyLoadingMaskType.black);
+                    }
+                  } catch (e) {
+                    print('An error occurred: $e');
+                    EasyLoading.showError("Error occurred. Please try again later", maskType: EasyLoadingMaskType.black);
+                  } finally {
+                    EasyLoading.dismiss();
+                    Navigator.of(context).pop();
+                  }
                 },
+
                 child:  SubscriptionCard(
                   title:  "Advanced",
                   currency: 'LKR',
@@ -135,24 +169,42 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                 ),
               ),
               GestureDetector(
-                onTap: (){
-                  SubscriptionPayment().premiumPetPurchasePayment(
-                    mainContext:context,
-                    gSignClientId: '${user?.uid}',
-                    sAppID:'sAppID',
-                    skey:'skey',
-                    phone: '',
-                    email:' ${user?.email}',
-                    name: '${user?.email}',
-                    country:'Sri Lanka',
-                    subscriptionDate:today,
-                    subscriptionPlanCategory:'Standard',
-                    subscriptionExpireDate:   today.add(Duration(days: 30)),
-                    recurrence:'1 Month',
-                    duration:'10 Years',
-                    price:500,
-                  );
+                onTap: () async {
+                  EasyLoading.show(status: 'Processing...', maskType: EasyLoadingMaskType.black);
+
+                  try {
+                    final String? skey = await FirebaseManage().getPayHereRecurringSKey();
+                    final String? sAppID = await FirebaseManage().getPayHereRecurringAPPID();
+
+                    if (skey != null && sAppID != null) {
+                      await SubscriptionPayment().premiumPetPurchasePayment(
+                        mainContext:context,
+                        gSignClientId: '${user?.uid}',
+                        sAppID:'sAppID',
+                        skey:'skey',
+                        phone: '',
+                        email:' ${user?.email}',
+                        name: '${user?.email}',
+                        country:'Sri Lanka',
+                        subscriptionDate:today,
+                        subscriptionPlanCategory:'Standard',
+                        subscriptionExpireDate:   today.add(Duration(days: 30)),
+                        recurrence:'1 Month',
+                        duration:'10 Years',
+                        price:500,
+                      );
+                    } else {
+                      EasyLoading.showError("Error occurred. Please try again later", maskType: EasyLoadingMaskType.black);
+                    }
+                  } catch (e) {
+                    print('An error occurred: $e');
+                    EasyLoading.showError("Error occurred. Please try again later", maskType: EasyLoadingMaskType.black);
+                  } finally {
+                    EasyLoading.dismiss();
+                    Navigator.of(context).pop();
+                  }
                 },
+
                 child:  SubscriptionCard(
                   title:  "Standard",
                   currency: 'LKR',
@@ -171,113 +223,25 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
 
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 1,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (BuildContext context) =>  CancelSubscriptionScreen(),
+            ),
+          );
+        },
+        icon: const Icon(Icons.workspace_premium),
+        label: Text('Promo Code'.toUpperCase(),style: TextStyle(
+            fontSize: 12),),
+        backgroundColor: Colors.purple,
+      ),
     );
   }
 }
-Future<void> accessToken(String reasonToSave,BuildContext context) async {
-  // Sandbox - https://sandbox.payhere.lk/merchant/v1/oauth/token
 
-  if (kDebugMode) {
-    print('payHereCancel() payHereCancel()');
-  }
-  String url = 'https://www.payhere.lk/merchant/v1/oauth/token';
-
-// test -  'Authorization': 'Basic NE9WeE1kYkZqZEk0SkREU1dxQjJpWDNMSjo0a21mTXc5OUFPbzREc0FZdUJseTMzNEpFV3g4eGpVYWo4Z2R1Q29TSzBnYQ==',
-
-
-  // The headers for the API call
-  Map<String, String> headers = {
-    'Authorization': 'Basic NE9WeE1kYkZqZEk0SkREU1dxQjJpWDNMSjo0a21mTXc5OUFPbzREc0FZdUJseTMzNEpFV3g4eGpVYWo4Z2R1Q29TSzBnYQ==',
-
-  };
-
-  // The body for the API call
-  Map<String, String> body = {
-    'grant_type': 'client_credentials'
-  };
-  // Making the POST request
-  http.Response response = await http.post(
-    Uri.parse(url),
-    headers: headers,
-    body: jsonEncode(body),
-  );
-
-
-  // Checking the status of the response
-  if (response.statusCode == 200) {
-    Map<String, dynamic> decodedResponse = jsonDecode(response.body);
-    String accessToken = decodedResponse['access_token']; // Extract access_token
-    print('Access Token: $accessToken'); // Print access_token
-
-    payHereCancel(reasonToSave:reasonToSave,accessToken:accessToken,mainContext:context);  // Assuming this function is defined elsewhere
-
-    if (kDebugMode) {
-      print('Successfully accessToken');
-    }
-  } else {
-    if (kDebugMode) {
-      print('Failed to get access token: ${response.statusCode}');
-    }
-  }
-}
-
-
-Future<void> payHereCancel({required String reasonToSave,required String accessToken, required BuildContext mainContext}) async {
-
-  if (kDebugMode) {
-    print('payHereCancel() payHereCancel() $accessToken');
-  }
-  // Sandbox - https://sandbox.payhere.lk/merchant/v1/subscription/cancel
-
-
-  String url = 'https://www.payhere.lk/merchant/v1/subscription/cancel';
-
-  // The headers for the API call
-  Map<String, String> headers = {
-    'Authorization': 'Bearer $accessToken',
-    'Content-Type': 'application/json',
-  };
-
-  // The body for the API call
-  Map<String, String> body = {
-    'subscription_id': "121313"
-  };
-
-  // Making the POST request
-  http.Response response = await http.post(
-    Uri.parse(url),
-    headers: headers,
-    body: jsonEncode(body),
-  );
-
-  // Decoding the response
-  Map<String, dynamic> decodedResponse = jsonDecode(response.body);
-
-  // Checking the status of the response
-  if (decodedResponse['status'] == 1) {
-    // saveReasonToFirestore(reasonToSave);
-
-    if (kDebugMode) {
-      print('Successfully cancelled the subscription');
-    }
-
-    // You can delay the navigation if you wish
-    // navigateCancelComplete(context);
-    // showSnackBar("Successfully cancelled the subscription", Duration(milliseconds: 800));
-  } else if (decodedResponse['status'] == -1) {
-    if (kDebugMode) {
-      print('Error: ${decodedResponse['msg']}');
-      // saveReasonToFirestore(reasonToSave);
-      // // You can delay the navigation if you wish
-      // navigateCancelComplete(context);
-      // showSnackBar("${decodedResponse['msg']}", Duration(milliseconds: 800));
-    }
-  } else {
-    if (kDebugMode) {
-      print('An unknown error occurred');
-    }
-  }
-}
 class SubscriptionCard extends StatelessWidget {
   final String title;
   final String currency;

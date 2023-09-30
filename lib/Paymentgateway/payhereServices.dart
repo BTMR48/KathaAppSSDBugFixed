@@ -12,12 +12,10 @@ import 'firebaseManage.dart';
 
 class SubscriptionPayment {
 
-  void premiumPetPurchasePayment({
 
-
+  Future <void> premiumPetPurchasePayment({
     required String country,
     required String skey,
-
     required String sAppID,
     required String gSignClientId,
     required String phone,
@@ -37,17 +35,17 @@ class SubscriptionPayment {
     // Creating a payment object
     Map paymentObject = {
       "sandbox": true,                 // true if using Sandbox Merchant ID
-      "merchant_id": "1223095",        // Replace your Merchant ID
-      "merchant_secret": "MzM2NTk5NjI4NDM4NDk1MDQ5MzYxNjIxMTg0MTAzMjEyMjc4MjE0OQ==",        // See step 4e
+      "merchant_id": sAppID,        // Replace your Merchant ID
+      "merchant_secret": skey,        // See step 4e
       "notify_url": "",//
       "order_id": orderId,      //payment no
-      "items": subscriptionPlanCategory, //package number //plan
+      "items": subscriptionPlanCategory ,
       "amount": price,               // Recurring amount
-      "recurrence": recurrence,         // Recurring payment frequency
-      "duration": duration,            // Recurring payment duration
+      "recurrence": "1 Month",         // Recurring payment frequency
+      "duration": "1 Year",            // Recurring payment duration
       "startup_fee": "0.00",          // Extra amount for first payment
       "currency": "LKR",
-      "first_name": ' ',
+      "first_name": " ",
       "last_name": '',
       "email": email,
       "phone": "",

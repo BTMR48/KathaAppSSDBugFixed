@@ -1,6 +1,7 @@
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:katha/splashScreen.dart';
 
 import 'package:provider/provider.dart';
@@ -37,7 +38,8 @@ class MyApp extends StatelessWidget {
           create: ((context) => InternetProvider()),
         )
       ],
-      child:  const MaterialApp(
+      child:   MaterialApp(
+        builder: EasyLoading.init(),
         home: SplashScreen(),
         debugShowCheckedModeBanner: false,
       ),
