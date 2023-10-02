@@ -1,11 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:katha/splashScreen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
-import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
+
+import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart'
+    if (dart.library.io) 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 
 import 'Provider/internet_provider.dart';
 import 'Provider/sign_in_provider.dart';
@@ -37,45 +40,48 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool? _jailbroken;
-  bool? _developerMode;
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    if (!kIsWeb) {
+      initPlatformState();
+    }
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     bool jailbroken;
-    bool developerMode;
     try {
       jailbroken = await FlutterJailbreakDetection.jailbroken;
-      developerMode = await FlutterJailbreakDetection.developerMode;
     } on PlatformException {
       jailbroken = true;
-      developerMode = true;
     }
 
     if (!mounted) return;
 
     setState(() {
       _jailbroken = jailbroken;
-      _developerMode = developerMode;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_jailbroken == true || _developerMode == true) {
-      // Handle jailbroken or developer mode enabled devices
+    if (!kIsWeb && _jailbroken == true) {
+      // Handle jailbroken devices
+      WidgetsBinding.instance!.addPostFrameCallback((_) async {
+        // Wait for 5 seconds for the user to read the message
+        await Future.delayed(Duration(seconds: 5));
+        // Close the app
+        SystemNavigator.pop();
+      });
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(
-            title: Text('Jailbroken or Developer mode enabled'),
+            title: Text('Jailbroken Device'),
           ),
           body: Center(
-            child: Text('Sorry, this app cannot run on jailbroken or developer mode enabled devices.'),
+            child: Text('Sorry, this app cannot run on jailbroken devices. The app will close in 5 seconds.'),
           ),
         ),
       );
