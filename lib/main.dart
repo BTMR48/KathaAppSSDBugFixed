@@ -7,8 +7,7 @@ import 'package:provider/provider.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart'
-    if (dart.library.io) 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
+import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 
 import 'Provider/internet_provider.dart';
 import 'Provider/sign_in_provider.dart';
