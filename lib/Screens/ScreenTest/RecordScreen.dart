@@ -108,6 +108,7 @@ class _RecordScreenState extends State<RecordScreen> {
   }
 
   Future<void> uploadAudio(File audioFile, String inputWord) async {
+    // Private IP disclosure
     late String predictUrl= "http://192.168.8.181:5000/predict";
     var request = http.MultipartRequest('POST', Uri.parse(predictUrl));
     request.fields['input_word'] = inputWord;

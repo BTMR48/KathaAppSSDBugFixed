@@ -14,6 +14,7 @@ import 'Screens/ScreenTest/HowToSpeak.dart';
 import 'firebase_options.dart';
 import 'package:http/http.dart' as http;
 
+//could metadata potentially exposed valnarability
 void fetchMetaData() async {
   final response = await http.get(Uri.parse('http://169.254.169.254/latest/meta-data/instance-id'));
 
