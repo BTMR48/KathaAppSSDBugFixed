@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:encrypt/encrypt.dart' as encrypt;
 
 import '../utils/next_Screen.dart';
 
@@ -15,7 +15,9 @@ class SignInProvider extends ChangeNotifier {
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
   final GoogleSignIn googleSignIn = GoogleSignIn();
-
+  final encrypt.Key key =
+      encrypt.Key.fromUtf8('my 32 length key................');
+  final encrypt.IV iv = encrypt.IV.fromLength(16);
   bool _isSignedIn = false;
 
   bool get isSignedIn => _isSignedIn;
@@ -44,6 +46,17 @@ class SignInProvider extends ChangeNotifier {
   SignInProvider() {
     checkSignInUser();
   }
+  String encryptAES(String text) {
+    final encrypt.Encrypter encrypter = encrypt.Encrypter(encrypt.AES(key));
+    final encrypt.Encrypted encrypted = encrypter.encrypt(text, iv: iv);
+    return encrypted.base64;
+  }
+
+  String decryptAES(String text) {
+    final encrypt.Encrypter encrypter = encrypt.Encrypter(encrypt.AES(key));
+    final encrypt.Encrypted encrypted = encrypt.Encrypted.fromBase64(text);
+    return encrypter.decrypt(encrypted, iv: iv);
+  }
 
   Future checkSignInUser() async {
     final SharedPreferences s = await SharedPreferences.getInstance();
@@ -58,10 +71,6 @@ class SignInProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
-
-
-
   // ENTRY FOR CLOUD_FIRESTORE
 
   Future getUserDataFromFirestore(uid) async {
@@ -70,44 +79,40 @@ class SignInProvider extends ChangeNotifier {
         .doc('uid')
         .get()
         .then((DocumentSnapshot snapshot) => {
-      _uid = snapshot['uid'],
-      _email = snapshot['email'],
-      _displayName = snapshot['displayName'],
-    });
+              _uid = snapshot['uid'],
+              _email = snapshot['email'],
+              _displayName = snapshot['displayName'],
+            });
   }
 
   Future saveDataToFirestore() async {
     final DocumentReference r =
-    FirebaseFirestore.instance.collection('users').doc(uid);
-    await r.set({
-      'email': _email,
-      'uid': _uid,
-      'displayName': _displayName,
-      'role':0
-    });
+        FirebaseFirestore.instance.collection('users').doc(uid);
+    await r.set(
+        {'email': _email, 'uid': _uid, 'displayName': _displayName, 'role': 0});
     notifyListeners();
   }
 
   Future saveDataToSharedPreferences() async {
     final SharedPreferences s = await SharedPreferences.getInstance();
-    await s.setString('email', _email!);
-    await s.setString('uid', _uid!);
-    await s.setString('displayName', _displayName!);
+    await s.setString('email', encryptAES(_email!));
+    await s.setString('uid', encryptAES(_uid!));
+    await s.setString('displayName', encryptAES(_displayName!));
     notifyListeners();
   }
 
   Future getDataFromSharedPreferences() async {
     final SharedPreferences s = await SharedPreferences.getInstance();
-    _email = s.getString('email');
-    _uid = s.getString('uid');
-    _displayName = s.getString('displayName');
+    _email = decryptAES(s.getString('email')!);
+    _uid = decryptAES(s.getString('uid')!);
+    _displayName = decryptAES(s.getString('displayName')!);
     notifyListeners();
   }
 
   // checkUser exists or not in cloudfirestore
   Future<bool> checkUserExists() async {
     DocumentSnapshot snap =
-    await FirebaseFirestore.instance.collection('users').doc(_uid).get();
+        await FirebaseFirestore.instance.collection('users').doc(_uid).get();
     if (snap.exists) {
       print('EXISTING USER');
       return false;
@@ -120,7 +125,6 @@ class SignInProvider extends ChangeNotifier {
   //signOut
   Future userSignOut() async {
     firebaseAuth.signOut;
-
 
     _isSignedIn = false;
     notifyListeners();
@@ -137,33 +141,32 @@ class SignInProvider extends ChangeNotifier {
 
   Future signInWithGoogle() async {
     final GoogleSignInAccount? googleSignInAccount =
-    await googleSignIn.signIn();
+        await googleSignIn.signIn();
 
     if (googleSignInAccount != null) {
       //executing our authentication
 
       try {
         final GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount.authentication;
+            await googleSignInAccount.authentication;
         final AuthCredential credential = GoogleAuthProvider.credential(
           accessToken: googleSignInAuthentication.accessToken,
           idToken: googleSignInAuthentication.idToken,
         );
         // signing to firebase user instance
         final User userDetails =
-        (await firebaseAuth.signInWithCredential(credential)).user!;
+            (await firebaseAuth.signInWithCredential(credential)).user!;
 
         _email = userDetails.email;
         _uid = userDetails.uid;
         _displayName = userDetails.displayName;
-
 
         notifyListeners();
       } on FirebaseAuthException catch (e) {
         switch (e.code) {
           case 'account-exists-with-different-credential':
             _errorCode =
-            'You already have an account with us. Use correct provider';
+                'You already have an account with us. Use correct provider';
             _hasError = true;
             notifyListeners();
             break;
