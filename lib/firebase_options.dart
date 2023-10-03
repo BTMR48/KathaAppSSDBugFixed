@@ -3,6 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -46,8 +47,8 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDzhgphZjhZfYzXJJdUNGgpOdaBnwo2kxc',
+  static final FirebaseOptions web = FirebaseOptions(
+    apiKey: dotenv.env['WEB_API_KEY']!,
     appId: '1:545437686783:web:2440eabea145ee8c4525ca',
     messagingSenderId: '545437686783',
     projectId: 'kathaappssd',
@@ -55,16 +56,16 @@ class DefaultFirebaseOptions {
     storageBucket: 'kathaappssd.appspot.com',
   );
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAze1gk67VY2xpRRn0uDnb18ul0ssX-230',
+  static final FirebaseOptions android = FirebaseOptions(
+    apiKey: dotenv.env['ANDROID_API_KEY']!,
     appId: '1:545437686783:android:7246d860ea1436684525ca',
     messagingSenderId: '545437686783',
     projectId: 'kathaappssd',
     storageBucket: 'kathaappssd.appspot.com',
   );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBce4hzH2WmCKwro7RjGxREmKv8Kh5jtwE',
+  static final FirebaseOptions ios = FirebaseOptions(
+    apiKey: dotenv.env['IOS_API_KEY']!,    
     appId: '1:545437686783:ios:62a314c88f4939db4525ca',
     messagingSenderId: '545437686783',
     projectId: 'kathaappssd',

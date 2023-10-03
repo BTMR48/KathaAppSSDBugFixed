@@ -12,7 +12,20 @@
           "package_name": "com.kathaapp.katha"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "545437686783-rmumnm2ept8ne1d5uuk1bk29aui85ial.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kathaapp.katha",
+            "certificate_hash": "fa794c9f5ea3e0f5439fd205b2971e05c6c6fcb9"
+          }
+        },
+        {
+          "client_id": "545437686783-sfrln5lmuqj0vdn9i1jfhijaqen55bhf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAze1gk67VY2xpRRn0uDnb18ul0ssX-230"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "545437686783-sfrln5lmuqj0vdn9i1jfhijaqen55bhf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "545437686783-mdpqqvt16im8l382qeocbt8pkj51m4h0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.kathaapp.katha"
+              }
+            }
+          ]
         }
       }
     }
