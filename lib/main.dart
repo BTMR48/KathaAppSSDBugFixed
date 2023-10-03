@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter/foundation.dart';
 import 'package:katha/splashScreen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -95,7 +96,9 @@ class _MyAppState extends State<MyApp> {
           create: ((context) => InternetProvider()),
         ),
       ],
-      child: const MaterialApp(
+
+      child:   MaterialApp(
+        builder: EasyLoading.init(),
         home: SplashScreen(),
         debugShowCheckedModeBanner: false,
       ),

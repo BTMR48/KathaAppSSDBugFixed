@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 
+import '../../../Paymentgateway/subscriptionPlanScreen.dart';
 import '../../../utils/configt.dart';
 import '../../GameScreen/Game/animationScreen.dart';
 import '../../GameScreen/Game/dataentry_screen.dart';
@@ -191,6 +192,37 @@ class _HomeScreenAllState extends State<HomeScreenAll> {
                                     ),
                                   ),
                                 ),
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => SubscriptionPlansScreen(),
+                                ));
+                              },
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.teal.shade400,
+                                padding: EdgeInsets.all(16.0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16.0),
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const <Widget>[
+                                  Icon(Icons.healing,
+                                      size: 60.0, color: Colors.white),
+                                  SizedBox(height: 16.0),
+                                  Text(
+                                    'PAY',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 24.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
 
