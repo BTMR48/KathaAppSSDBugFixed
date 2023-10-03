@@ -14,6 +14,7 @@ import 'InCorrect.dart';
 import 'ListWords.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
+
 class RecordScreen extends StatefulWidget {
   @override
   _RecordScreenState createState() => _RecordScreenState();
@@ -40,12 +41,12 @@ class _RecordScreenState extends State<RecordScreen> {
       _handleTap();
     });
   }
-  void _handleTap() {
-    Timer(Duration(seconds:15), () {
 
-    });
+  void _handleTap() {
+    Timer(Duration(seconds: 15), () {});
     audioPlayer.resume();
   }
+
   //function to initialize audio
   Future setAudio() async {
     audioPlayer.setReleaseMode(ReleaseMode.loop);
@@ -55,6 +56,13 @@ class _RecordScreenState extends State<RecordScreen> {
     final url = await player.load("S3_1.wav");
     audioPlayer.setSourceUrl(url.path);
   }
+
+  Future<Map<String, dynamic>> readConfig() async {
+    final String configString =
+        await File('path/to/config.json').readAsString();
+    return jsonDecode(configString);
+  }
+
   Future<void> _startRecording() async {
     try {
       if (await FlutterSoundRecorder().isRecording) {
@@ -73,10 +81,10 @@ class _RecordScreenState extends State<RecordScreen> {
           category: SessionCategory.playAndRecord);
       await _recorder!.startRecorder(
         toFile: tempPath,
-        codec: Codec.pcm16WAV,  // Specifies WAV format
-        numChannels: 1,  // For mono recording
-        sampleRate: 16000,  // 48KHz sample rate for higher quality
-        bitRate: 256000,  // 256 kbps bit rate to match training data
+        codec: Codec.pcm16WAV, // Specifies WAV format
+        numChannels: 1, // For mono recording
+        sampleRate: 16000, // 48KHz sample rate for higher quality
+        bitRate: 256000, // 256 kbps bit rate to match training data
       );
       setState(() {
         _isRecording = true;
@@ -86,7 +94,6 @@ class _RecordScreenState extends State<RecordScreen> {
       print('Error occurred while starting recording: $e');
     }
   }
-
 
   Future<void> _stopRecording() async {
     try {
@@ -108,41 +115,51 @@ class _RecordScreenState extends State<RecordScreen> {
   }
 
   Future<void> uploadAudio(File audioFile, String inputWord) async {
-    // Private IP disclosure
-    late String predictUrl= "http://192.168.8.181:5000/predict";
-    var request = http.MultipartRequest('POST', Uri.parse(predictUrl));
+    Map<String, dynamic> config = await readConfig(); // Read the config
+    String serverUrl = config["SERVER_URL"]; // Get the server URL from config
+
+    var request = http.MultipartRequest(
+        'POST', Uri.parse(serverUrl)); // Use HTTPS and the URL from the config
     request.fields['input_word'] = inputWord;
-    request.files.add(http.MultipartFile.fromBytes('audio_file', await audioFile.readAsBytes(), filename: 'audio.wav'));
+    request.files.add(http.MultipartFile.fromBytes(
+        'audio_file', await audioFile.readAsBytes(),
+        filename: 'audio.wav'));
 
-    var response = await request.send();
+    try {
+      var response = await request.send();
 
-    if (response.statusCode == 200) {
-      var result = await http.Response.fromStream(response);
-      print('Result: ${result.body}');
-      var parsedJson = json.decode(result.body);
-      if (parsedJson['result'] == "Correct Answer") {
-        audioPlayer.dispose();  audioPlayer.pause();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Correct(),
-          ),
-        );
+      if (response.statusCode == 200) {
+        var result = await http.Response.fromStream(response);
+        print('Result: ${result.body}');
+        var parsedJson = json.decode(result.body);
+
+        // Assuming audioPlayer is accessible in this scope
+        audioPlayer.dispose();
+        audioPlayer.pause();
+
+        if (parsedJson['result'] == "Correct Answer") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Correct(),
+            ),
+          );
+        } else if (parsedJson['result'] == "Wrong Answer") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => InCorrect(),
+            ),
+          );
+        }
+      } else {
+        print('Failed to upload audio');
       }
-      if (parsedJson['result'] == "Wrong Answer") {
-        audioPlayer.dispose();  audioPlayer.pause();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => InCorrect(),
-          ),
-        );
-      }
-
-    } else {
-      print('Failed to upload audio');
+    } catch (e) {
+      print("An error occurred: $e");
     }
   }
+
   @override
   void dispose() {
     _recorder!.closeAudioSession();
@@ -150,7 +167,6 @@ class _RecordScreenState extends State<RecordScreen> {
     audioPlayer.pause();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -160,7 +176,7 @@ class _RecordScreenState extends State<RecordScreen> {
       child: Scaffold(
         body: Container(
           decoration: BoxDecoration(
-            gradient:  LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment(0.407, -1),
               end: Alignment(-0.407, 1),
               colors: <Color>[
@@ -181,8 +197,10 @@ class _RecordScreenState extends State<RecordScreen> {
                     sigmaY: 13.5914087296 * fem,
                   ),
                   child: Container(
-                    margin: EdgeInsets.fromLTRB(0 * fem, 0 * fem, 0 * fem, 16 * fem),
-                    padding: EdgeInsets.fromLTRB(36.33 * fem, 14 * fem, 14.67 * fem, 0 * fem),
+                    margin: EdgeInsets.fromLTRB(
+                        0 * fem, 0 * fem, 0 * fem, 16 * fem),
+                    padding: EdgeInsets.fromLTRB(
+                        36.33 * fem, 14 * fem, 14.67 * fem, 0 * fem),
                     width: double.infinity,
                     height: 54 * fem,
                     decoration: BoxDecoration(
@@ -201,7 +219,8 @@ class _RecordScreenState extends State<RecordScreen> {
                             height: 30 * fem,
                             child: ElevatedButton(
                               onPressed: () {
-                                audioPlayer.dispose();  audioPlayer.pause();
+                                audioPlayer.dispose();
+                                audioPlayer.pause();
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -244,7 +263,8 @@ class _RecordScreenState extends State<RecordScreen> {
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 16 * fem), // Add necessary spacing
+                              SizedBox(
+                                  width: 16 * fem), // Add necessary spacing
                               Container(
                                 width: 43 * fem,
                                 height: 32 * fem,
@@ -299,7 +319,7 @@ class _RecordScreenState extends State<RecordScreen> {
                 ),
               ),
               SizedBox(
-                height: fem*10,
+                height: fem * 10,
               ),
               Positioned(
                 left: 0,
@@ -312,13 +332,15 @@ class _RecordScreenState extends State<RecordScreen> {
                 ),
               ),
               SizedBox(
-                height: fem*40,
+                height: fem * 40,
               ),
               Container(
                 decoration: BoxDecoration(
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black26, offset: Offset(0, 4), blurRadius: 5.0)
+                        color: Colors.black26,
+                        offset: Offset(0, 4),
+                        blurRadius: 5.0)
                   ],
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -335,18 +357,18 @@ class _RecordScreenState extends State<RecordScreen> {
                 child: ElevatedButton(
                   child: _isRecording
                       ? SpinKitCircle(
-                    color: Colors.white,
-                    size: 50.0,
-                  )
+                          color: Colors.white,
+                          size: 50.0,
+                        )
                       : Text(
-                    '',
-                    style: TextStyle(
-                      fontFamily: 'Noto Sans Sinhala',
-                      fontSize: 18.5,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xff591010),
-                    ),
-                  ),
+                          '',
+                          style: TextStyle(
+                            fontFamily: 'Noto Sans Sinhala',
+                            fontSize: 18.5,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xff591010),
+                          ),
+                        ),
                   style: ButtonStyle(
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
@@ -355,13 +377,13 @@ class _RecordScreenState extends State<RecordScreen> {
                     ),
                     minimumSize: MaterialStateProperty.all(Size(fem, 50)),
                     backgroundColor:
-                    MaterialStateProperty.all(Colors.transparent),
+                        MaterialStateProperty.all(Colors.transparent),
                     // elevation: MaterialStateProperty.all(3),
-                    shadowColor:
-                    MaterialStateProperty.all(Colors.transparent),
+                    shadowColor: MaterialStateProperty.all(Colors.transparent),
                   ),
-                  onPressed: (){
-                    audioPlayer.dispose();  audioPlayer.pause();
+                  onPressed: () {
+                    audioPlayer.dispose();
+                    audioPlayer.pause();
                     audioPlayer.pause();
                     if (_isRecording) {
                       _stopRecording();
